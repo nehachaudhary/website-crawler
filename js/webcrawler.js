@@ -12,12 +12,27 @@
 		baseURL = 'http://newsmartwave.net/html/venedor/green/',
 		yqlURL = 'https://query.yahooapis.com/v1/public/yql?q=',
 		executeOnce = true;
-							  
 
+		// home page content
+		downloadContent(yqlURL + getQueryString(baseURL + "index.html"), yqlCallback, linkCollection);
+		
 		function getQueryString(url){
 			return 'SELECT * FROM html WHERE url=\"'
 					  + url + 
 					  '\" AND xpath=\"//a[contains(@href,\'%2Ehtml\')]\"&format=json';
+		}
+		
+		function yqlCallback(data) {
+		    var results = data.query.results;
+		    if(results !== null){
+			    var allLinks = results.a;
+			    for(var index = 0; index < allLinks.length; index++){
+			    	var href = allLinks[index].href.replace(/\.\./g,'').replace('/','');
+			    	if ($.inArray(href, linkCollection) === -1) {
+			    		linkCollection.push(href);
+			    	}
+			    }
+		    }
 		}
 		
 		function downloadContent(url, callback, linkCollection){
@@ -55,21 +70,4 @@
 			});
 			
 		}
-		
-		function yqlCallback(data) {
-		    var results = data.query.results;
-		    if(results !== null){
-			    var allLinks = results.a;
-			    for(var index = 0; index < allLinks.length; index++){
-			    	var href = allLinks[index].href.replace(/\.\./g,'').replace('/','');
-			    	if ($.inArray(href, linkCollection) === -1) {
-			    		linkCollection.push(href);
-			    	}
-			    }
-		    }
-		}
-
-		// home page content
-		downloadContent(yqlURL + getQueryString(baseURL + "index.html"), yqlCallback, linkCollection);
-		
 })(jQuery);
