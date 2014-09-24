@@ -10,7 +10,8 @@
 		visitedLinkCollection = [],
 		productDetailCollection = [],
 		baseURL = 'http://newsmartwave.net/html/venedor/green/',
-		yqlURL = 'https://query.yahooapis.com/v1/public/yql?q=';
+		yqlURL = 'https://query.yahooapis.com/v1/public/yql?q=',
+		executeOnce = true;
 							  
 
 		function getQueryString(url){
@@ -19,34 +20,56 @@
 					  '\" AND xpath=\"//a[contains(@href,\'%2Ehtml\')]\"&format=json';
 		}
 		
-		function downloadContent(url, callback){
+		function downloadContent(url, callback, linkCollection){
 			$.getJSON(url, callback).then(function(){
 			// this will be done only on visitedLinkCollection
-				for(var index = 0; index < linkCollection.length; index++){
-					var url = getQueryString(baseURL + linkCollection[index]);
-					if ($.inArray(linkCollection[index], visitedLinkCollection) === -1) {
-						visitedLinkCollection.push(linkCollection[index]);
-						linkCollection.splice(index,1);
-						var link = $('<div/>').html(baseURL + linkCollection[index]);
-						$('.js-link-list').append(link);
-						downloadContent(yqlURL + url, yqlCallback);
-					}
+				crawlDeep(linkCollection);
+				if(executeOnce){
+					renderLinks(linkCollection);
+					displayProductDetails(linkCollection);
 				}
+				executeOnce = false;
 			});
 		}
 
+		function crawlDeep(linkCollection){
+			for(var j = 0; j < linkCollection.length; j++){
+				var url = getQueryString(baseURL + linkCollection[j]);
+		    	if ($.inArray(linkCollection[j], visitedLinkCollection) === -1) {
+		    		visitedLinkCollection.push(linkCollection[j]);
+		    		downloadContent(yqlURL + url, yqlCallback, visitedLinkCollection);
+		    	}
+			}
+		}
+		
+		function renderLinks(linkCollection){
+			for(var index = 0; index < linkCollection.length; index++){
+				var link = $('<div/>').html(baseURL + linkCollection[index]);
+				$('.js-link-list').append(link);
+			}
+		}
+		
+		function displayProductDetails(linkCollection){
+			var productLinks = $.grep(linkCollection, function(item, index){
+				return item.indexOf("index.html") > -1;
+			});
+			
+		}
+		
 		function yqlCallback(data) {
 		    var results = data.query.results;
 		    if(results !== null){
 			    var allLinks = results.a;
 			    for(var index = 0; index < allLinks.length; index++){
-			    	if ($.inArray(allLinks[index].href, linkCollection) === -1) {
-			    		linkCollection.push(allLinks[index].href);
+			    	var href = allLinks[index].href.replace(/\.\./g,'').replace('/','');
+			    	if ($.inArray(href, linkCollection) === -1) {
+			    		linkCollection.push(href);
 			    	}
 			    }
 		    }
 		}
 
-		downloadContent(yqlURL + getQueryString(baseURL + "index.html"), yqlCallback);
+		// home page content
+		downloadContent(yqlURL + getQueryString(baseURL + "index.html"), yqlCallback, linkCollection);
 		
 })(jQuery);
