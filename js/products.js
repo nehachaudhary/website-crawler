@@ -22,6 +22,7 @@
 					}
 				}
 				$('.js-product-details').append(frag);
+				$('.theme-product-details').show();
 			}
 		}
 	}

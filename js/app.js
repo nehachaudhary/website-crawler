@@ -110,6 +110,8 @@
 			frag.appendChild(link[0]);
 		}
 		$('.js-crawled-links').append(frag);
+		$('.theme-loading').hide();
+		$('.theme-crawled-links').show();
 	}
 	
 })(jQuery);
