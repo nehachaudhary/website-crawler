@@ -12,7 +12,13 @@
 	var Crawler = function (){
 		// downloads the content from the specified URL
 		this.downloadContent = function(options){
-			$.getJSON(formURL(options.link, options.xPathCondition), options.successCallback);
+			$.getJSON(formURL(options.link, options.xPathCondition), options.successCallback).then(function(){
+				if(options.afterSuccessCallback){
+					options.afterSuccessCallback.forEach(function(callback){
+						callback.call();
+					});
+				}
+			});
 		};
 	};
 	
