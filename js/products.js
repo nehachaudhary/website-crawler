@@ -5,18 +5,11 @@
 	function Products(){
 		this.render = function (productDetailCollection){
 			if(productDetailCollection){
-				var products = productDetailCollection.productDetails,
-				frag = document.createDocumentFragment(),
-				link = $('<div/>').html($('<a>/').attr('href',productDetailCollection.url)
-													 .text('Crawled Link'))
-									  .append($('<span/>').html(" : "+productDetailCollection.url))
-									  .addClass('col-md-12 theme-link-heading');
-				
-				$('.js-product-details').append(link);
-				
-				for(var key in products){
-					if(products.hasOwnProperty(key)){
-						var currentProduct = products[key],
+				var frag = document.createDocumentFragment();
+
+				for(var key in productDetailCollection){
+					if(productDetailCollection.hasOwnProperty(key)){
+						var currentProduct = productDetailCollection[key],
 						productLinkContainer = $('<a/>').attr('href', currentProduct.link).html($('<img/>').attr('src', currentProduct.imagePath)),
 						productPriceContainer = $('<div/>').html($('<span/>').text("Price : " + currentProduct.price)),
 						productNameContainer = $('<div/>').html($('<span/>').text(currentProduct.name)),
